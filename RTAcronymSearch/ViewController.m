@@ -12,7 +12,7 @@
 #import "RTAcronym.h"
 #import "RTAcronymSF.h"
 
-@interface ViewController ()<UISearchBarDelegate,UITableViewDataSource,UITableViewDataSource>
+@interface ViewController ()<UISearchBarDelegate,UITableViewDataSource,UITableViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (weak, nonatomic) IBOutlet UITableView *resultsTableView;
@@ -74,6 +74,8 @@
     return cell;
 }
 
+
+
 - (void) searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     [searchBar resignFirstResponder];
@@ -108,4 +110,30 @@
         
     }];
 }
+
+- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    RTAcronym* acronym = self.acronymData.longForms[indexPath.section];
+    RTAcronym* subAcronym = acronym.subLongformsArray[indexPath.row];
+
+    NSString* message = [NSString stringWithFormat:@"FREQUENCY:  %i\nUSED SINCE:  %i",(int)subAcronym.frequency,(int)subAcronym.usedSince];
+
+    UIAlertController* alertController = [UIAlertController alertControllerWithTitle:subAcronym.longForm message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* ok = [UIAlertAction
+                         actionWithTitle:@"OK"
+                         style:UIAlertActionStyleDefault
+                         handler:^(UIAlertAction * action)
+                         {
+                             //Do some thing here
+                             [self dismissViewControllerAnimated:YES completion:nil];
+                             
+                         }];
+    [alertController addAction:ok]; // add action to uialertcontroller
+    
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
 @end
