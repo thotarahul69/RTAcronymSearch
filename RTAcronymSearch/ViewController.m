@@ -7,14 +7,16 @@
 //
 
 #import "ViewController.h"
+#import "MBProgressHUD.h"
 #import "RTAcronymDataController.h"
 #import "RTAcronym.h"
 #import "RTAcronymSF.h"
 
-@interface ViewController ()<UISearchBarDelegate,UITableViewDataSource,UITableViewDataSource>
+@interface ViewController ()<UISearchBarDelegate,UITableViewDataSource,UITableViewDelegate>
 
 @property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (weak, nonatomic) IBOutlet UITableView *resultsTableView;
+@property (strong, nonatomic) RTAcronymSF* acronymData;
 
 @end
 
@@ -23,6 +25,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
+    [self.resultsTableView setTableFooterView:[UIView new]];
 }
 
 - (void) viewDidAppear:(BOOL)animated
@@ -39,12 +42,20 @@
 
 - (NSInteger) numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 1;
+    return self.acronymData.longForms.count;
+}
+
+- (NSString*) tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    RTAcronym* acronym = self.acronymData.longForms[section];
+    return acronym.longForm;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return 10;
+    RTAcronym* acronym = self.acronymData.longForms[section];
+    
+    return acronym.subLongformsArray.count;
 }
 
 - (UITableViewCell*)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -54,19 +65,75 @@
     
     UITableViewCell* cell = [tableView dequeueReusableCellWithIdentifier:kCellIdentifier];
     
-    [cell.textLabel setText:@"TEST"];
+    RTAcronym* acronym = self.acronymData.longForms[indexPath.section];
+    RTAcronym* subAcronym = acronym.subLongformsArray[indexPath.row];
+    
+    
+    [cell.textLabel setText:subAcronym.longForm];
     
     return cell;
 }
+
+
 
 - (void) searchBarSearchButtonClicked:(UISearchBar *)searchBar
 {
     [searchBar resignFirstResponder];
     
+    [MBProgressHUD showHUDAddedTo:self.resultsTableView animated:YES];
+    
     [[RTAcronymDataController manager] retrieveAcronymDataForSF:searchBar.text OnCompletion:^(RTAcronymSF *acronymData, NSError *error) {
-        for (RTAcronym* ac in acronymData.longForms) {
-            NSLog(@"AC %@",ac.longForm);
+        [MBProgressHUD hideHUDForView:self.resultsTableView animated:YES];
+        
+        if (error != nil) {
+            UIAlertController* alertController = [UIAlertController alertControllerWithTitle:@"Error retrieving data" message:error.localizedDescription preferredStyle:UIAlertControllerStyleAlert];
+            
+            UIAlertAction* ok = [UIAlertAction
+                                 actionWithTitle:@"OK"
+                                 style:UIAlertActionStyleDefault
+                                 handler:^(UIAlertAction * action)
+                                 {
+                                     //Do some thing here
+                                     [self dismissViewControllerAnimated:YES completion:nil];
+                                     
+                                 }];
+            [alertController addAction:ok]; // add action to uialertcontroller
+
+            
+            [self presentViewController:alertController animated:YES completion:nil];
         }
+    
+        self.acronymData = acronymData;
+        [self.resultsTableView reloadData];
+        
+        
+        
     }];
 }
+
+- (void) tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    
+    RTAcronym* acronym = self.acronymData.longForms[indexPath.section];
+    RTAcronym* subAcronym = acronym.subLongformsArray[indexPath.row];
+
+    NSString* message = [NSString stringWithFormat:@"FREQUENCY:  %i\nUSED SINCE:  %i",(int)subAcronym.frequency,(int)subAcronym.usedSince];
+
+    UIAlertController* alertController = [UIAlertController alertControllerWithTitle:subAcronym.longForm message:message preferredStyle:UIAlertControllerStyleAlert];
+    
+    UIAlertAction* ok = [UIAlertAction
+                         actionWithTitle:@"OK"
+                         style:UIAlertActionStyleDefault
+                         handler:^(UIAlertAction * action)
+                         {
+                             //Do some thing here
+                             [self dismissViewControllerAnimated:YES completion:nil];
+                             
+                         }];
+    [alertController addAction:ok]; // add action to uialertcontroller
+    
+    
+    [self presentViewController:alertController animated:YES completion:nil];
+}
+
 @end

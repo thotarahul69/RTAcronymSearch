@@ -121,12 +121,12 @@
 		3DDA393F1B8E873D007B932F /* RTAcronymSearch */ = {
 			isa = PBXGroup;
 			children = (
+				3DDA39761B8E87C7007B932F /* View Contorollers */,
 				3DDA39CE1B8E8A0F007B932F /* AFNetworking */,
 				3DDA39741B8E87AC007B932F /* MBProgressHUD */,
 				3DDA39751B8E87B9007B932F /* Models */,
 				3DDA39441B8E873D007B932F /* AppDelegate.h */,
 				3DDA39451B8E873D007B932F /* AppDelegate.m */,
-				3DDA39761B8E87C7007B932F /* View Contorollers */,
 				3DDA394A1B8E873D007B932F /* Main.storyboard */,
 				3DDA394D1B8E873D007B932F /* Images.xcassets */,
 				3DDA394F1B8E873D007B932F /* LaunchScreen.xib */,

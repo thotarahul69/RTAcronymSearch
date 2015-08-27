@@ -22,7 +22,9 @@ static NSString * const AcronymURLString = @"http://www.nactem.ac.uk/software/ac
 
 - (void) retrieveAcronymDataForSF:(NSString*)shortform OnCompletion:(void (^)(RTAcronymSF *acronymData, NSError *error))onCompletion
 {
-    NSString* urlSting = [NSString stringWithFormat:@"%@%@",AcronymURLString,shortform];
+   NSString* encodeShortForm = [shortform stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+    
+    NSString* urlSting = [NSString stringWithFormat:@"%@%@",AcronymURLString,encodeShortForm];
     NSURL* url = [NSURL URLWithString:urlSting];
     NSURLRequest* request = [NSURLRequest requestWithURL:url];
     AFHTTPRequestOperation *op = [[AFHTTPRequestOperation alloc] initWithRequest:request];
